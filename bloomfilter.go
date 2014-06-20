@@ -1,6 +1,7 @@
 package bloomfilter
 
 import (
+  "github.com/steakknife/hamming"
   "math/rand"
   "time"
 )
@@ -66,16 +67,36 @@ func (f *Filter) Add(v Hashable) {
   }
 }
 
-func countOnes(x uint64) int {
-  c := x - ((x >> 1) & 033333333333) - ((x >> 2) & 011111111111)
-  return int((c+(c>>3))&030707070707) % 63
-}
+/*
+1  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3  3
+1011011011011011011011011011011011011011011011011011011011011011
+
+1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+1001001001001001001001001001001001001001001001001001001001001001
+
+0  7  0  7  0  7  0  7  0  7  0  7  0  7  0  7  0  7  0  7  0  7
+0111000111000111000111000111000111000111000111000111000111000111
+
+0123456789012345678901234567890123456789012345678901234567890123
+          1         2         3         4         5         6
+*/
+
+const (
+  m1  uint64 = 0x5555555555555555 //binary: 0101...
+  m2  uint64 = 0x3333333333333333 //binary: 00110011..
+  m4  uint64 = 0x0f0f0f0f0f0f0f0f //binary:  4 zeros,  4 ones ...
+  m8  uint64 = 0x00ff00ff00ff00ff //binary:  8 zeros,  8 ones ...
+  m16 uint64 = 0x0000ffff0000ffff //binary: 16 zeros, 16 ones ...
+  m32 uint64 = 0x00000000ffffffff //binary: 32 zeros, 32 ones
+  hff uint64 = 0xffffffffffffffff //binary: all ones
+  h01 uint64 = 0x0101010101010101 //the sum of 256 to the power of 0,1,2,3...
+)
 
 // count # of 1's
 func (f Filter) FilledRatio() float32 {
   ones := 0
   for _, b := range f.bits {
-    ones += countOnes(b)
+    ones += hamming.CountBitsUint64(b)
   }
   return float32(ones) / float32(len(f.bits))
 }

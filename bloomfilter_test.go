@@ -5,46 +5,6 @@ import (
   "testing"
 )
 
-type testCountOnesCase struct {
-  b uint64
-  n int
-}
-
-var testCountOnesCases = []testCountOnesCase{
-  {0x00, 0},
-  {0x01, 1},
-  {0x02, 1},
-  {0x03, 2},
-  {0xaa, 4},
-  {0x55, 4},
-  {0x7f, 7},
-  {0xff, 8},
-}
-
-func TestCountOnes(t *testing.T) {
-  for _, c := range testCountOnesCases {
-    if countOnes(c.b) != c.n {
-      t.Fatal("countOnes(", c.b, ") != ", c.n)
-    } else {
-      t.Log("countOnes(", c.b, ") == ", c.n)
-    }
-  }
-
-}
-
-func BenchmarkCountOnes(b *testing.B) {
-  j := 0
-  var x uint64
-  for i := 0; i < b.N; i++ {
-    x = testCountOnesCases[j].b
-    countOnes(x)
-    j++
-    if j == len(testCountOnesCases) {
-      j = 0
-    }
-  }
-}
-
 type HashableUint32 uint32
 
 func (h HashableUint32) BloomFilterHash() uint32 {
