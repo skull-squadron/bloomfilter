@@ -205,15 +205,15 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 }
 
 func (f Filter) getBit(i uint64) bool {
-  if i >= f.n {
-    i %= f.n
+  if i >= f.m {
+    i %= f.m
   }
   return (f.bits[i>>6] >> uint(i&0x3f)) != 0
 }
 
 func (f *Filter) setBit(i uint64) {
-  if i >= f.n {
-    i %= f.n
+  if i >= f.m {
+    i %= f.m
   }
   f.bits[i>>6] |= 1 << uint(i&0x3f)
 }

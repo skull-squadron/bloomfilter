@@ -5,13 +5,13 @@ import (
   "testing"
 )
 
-type HashableUint32 uint32
+type HashableUint64 uint64
 
-func (h HashableUint32) BloomFilterHash() uint32 {
-  return uint32(h)
+func (h HashableUint64) BloomFilterHash() uint64 {
+  return uint64(h)
 }
 
-var hashableUint32Values = []HashableUint32{
+var hashableUint64Values = []HashableUint64{
   0,
   7,
   0x0c0ffee0,
@@ -19,7 +19,7 @@ var hashableUint32Values = []HashableUint32{
   0xffffffff,
 }
 
-var hashableUint32NotValues = []HashableUint32{
+var hashableUint64NotValues = []HashableUint64{
   1,
   5,
   42,
@@ -30,14 +30,14 @@ var hashableUint32NotValues = []HashableUint32{
 func Test0(t *testing.T) {
   bf := New(10000, 5)
 
-  t.Log("Filled ratio before adds :", bf.FilledRatio())
-  for _, x := range hashableUint32Values {
+  t.Log("Filled ratio before adds :", bf.PreciseFilledRatio())
+  for _, x := range hashableUint64Values {
     bf.Add(x)
   }
-  t.Log("Filled ratio after adds :", bf.FilledRatio())
+  t.Log("Filled ratio after adds :", bf.PreciseFilledRatio())
 
   // these may or may not be true
-  for _, y := range hashableUint32Values {
+  for _, y := range hashableUint64Values {
     if bf.Contains(y) {
       t.Log("value in set querties: may contain ", y)
     } else {
@@ -46,7 +46,7 @@ func Test0(t *testing.T) {
   }
 
   // these must all be false
-  for _, z := range hashableUint32NotValues {
+  for _, z := range hashableUint64NotValues {
     if bf.Contains(z) {
       t.Log("value not in set queries: may or may not contain ", z)
     } else {
@@ -60,7 +60,7 @@ func BenchmarkAddX10kX5(b *testing.B) {
   bf := New(10000, 5)
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    bf.Add(HashableUint32(rand.Uint32()))
+    bf.Add(HashableUint64(rand.Uint32()))
   }
 }
 
@@ -68,11 +68,11 @@ func BenchmarkContains1kX10kX5(b *testing.B) {
   b.StopTimer()
   bf := New(10000, 5)
   for i := 0; i < 1000; i++ {
-    bf.Add(HashableUint32(rand.Uint32()))
+    bf.Add(HashableUint64(rand.Uint32()))
   }
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    bf.Contains(HashableUint32(rand.Uint32()))
+    bf.Contains(HashableUint64(rand.Uint32()))
   }
 }
 
@@ -80,10 +80,10 @@ func BenchmarkContains100kX10BX20(b *testing.B) {
   b.StopTimer()
   bf := New(10*1000*1000*1000, 20)
   for i := 0; i < 100*1000; i++ {
-    bf.Add(HashableUint32(rand.Uint32()))
+    bf.Add(HashableUint64(rand.Uint32()))
   }
   b.StartTimer()
   for i := 0; i < b.N; i++ {
-    bf.Contains(HashableUint32(rand.Uint32()))
+    bf.Contains(HashableUint64(rand.Uint32()))
   }
 }
