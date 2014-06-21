@@ -1,6 +1,10 @@
 package bloomfilter
 
+// TODO probabilities, filled ratio
+
 import (
+  "bytes"
+  "encoding/binary"
   "github.com/steakknife/hamming"
   "math/rand"
   "time"
@@ -28,9 +32,19 @@ func newKeys(k int) (keys []uint32) {
   return
 }
 
-func New(m int, k int) *Filter {
+// m is the size of the bloom filter in bits
+// k is the number of randomly generated keys used (One-Time-Pad-inspired)
+// m must be > 0, or a runtime panic occurs
+// k must be > 0, or a runtime panic occurs
+func New(m int64, k int) *Filter {
+  if m <= 0 {
+    panic("m (number of bits in the bloom filter) must be > 0")
+  }
+  if k <= 0 {
+    panic("k (number of keys uses in the bloom filter) must be > 0")
+  }
   return &Filter{
-    bits: make([]uint64, (m+63)/64),
+    bits: make([]uint64, (m+63)>>6),
     keys: newKeys(k),
   }
 }
@@ -43,6 +57,72 @@ func (f Filter) hashKeys(v Hashable) (hashes []uint32) {
     hashes[i] = rawHash ^ f.keys[i]
   }
   return
+}
+
+// 32LE(len(f.keys))
+// 64LE(len(f.bits))
+func (f Filter) MarshalBinary() (data []byte, err error) {
+  nKeys := uint32(len(f.keys))
+  nBits := uint64(len(f.bits))
+
+  size := binary.Size(nKeys) + binary.Size(nBits) + binary.Size(f.keys) + binary.Size(f.bits)
+  data = make([]byte, 0, size)
+  buf := bytes.NewBuffer(data)
+
+  err = binary.Write(buf, binary.LittleEndian, nKeys)
+  if err != nil {
+    return
+  }
+
+  err = binary.Write(buf, binary.LittleEndian, nBits)
+  if err != nil {
+    return
+  }
+
+  err = binary.Write(buf, binary.LittleEndian, f.keys)
+  if err != nil {
+    return
+  }
+
+  err = binary.Write(buf, binary.LittleEndian, f.bits)
+  if err != nil {
+    return
+  }
+
+  data = buf.Bytes()
+  return
+}
+
+func (f *Filter) UnmarshalBinary(data []byte) (err error) {
+  var (
+    nKeys uint32
+    nBits uint64
+  )
+
+  buf := bytes.NewBuffer(data)
+  err = binary.Read(buf, binary.LittleEndian, nKeys)
+  if err != nil {
+    return
+  }
+
+  err = binary.Read(buf, binary.LittleEndian, nBits)
+  if err != nil {
+    return
+  }
+
+  f.keys = make([]uint32, nKeys, nKeys)
+  err = binary.Read(buf, binary.LittleEndian, f.keys)
+  if err != nil {
+    return
+  }
+
+  f.bits = make([]uint64, nBits, nBits)
+  err = binary.Read(buf, binary.LittleEndian, f.bits)
+  if err != nil {
+    return
+  }
+
+  return nil
 }
 
 func (f Filter) getBit(i uint32) bool {
