@@ -7,6 +7,7 @@ import (
   "encoding/binary"
   "errors"
   "github.com/steakknife/hamming"
+  "log"
   "math"
   "math/rand"
   "time"
@@ -25,6 +26,13 @@ type Filter struct {
   keys []uint64
   m    uint64 // number of bits the "bits" field should recognize
   n    uint64 // number of inserted elements
+}
+
+func NewOptimal(maxN uint64, p float64) *Filter {
+  m := OptimalM(maxN, p)
+  k := OptimalK(m, maxN)
+  log.Printf("New optimal bloom filter :: requested max elements (n):%d, probability of collision (p):%1.10f -> recommends -> bits (m): %d (%f GiB), number of keys (k): %d", maxN, p, m, float64(m)/(8.0*1024*1024*1024), k)
+  return New(m, k)
 }
 
 // m is the size of the bloom filter in bits, >= 2
