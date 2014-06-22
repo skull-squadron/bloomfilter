@@ -7,6 +7,7 @@ import (
   "encoding/binary"
   "errors"
   "github.com/steakknife/hamming"
+  "hash"
   "log"
   "math"
   "math/rand"
@@ -16,10 +17,6 @@ import (
 const (
   randSeedMagic int64 = 0x3f4a61e5b9c0278d
 )
-
-type Hashable interface {
-  BloomFilterHash() uint64
-}
 
 type Filter struct {
   bits []uint64
@@ -74,8 +71,8 @@ func newKeys(k uint64) (keys []uint64) {
 }
 
 // Hashable -> hashes
-func (f Filter) hash(v Hashable) (hashes []uint64) {
-  rawHash := v.BloomFilterHash()
+func (f Filter) hash(v hash.Hash64) (hashes []uint64) {
+  rawHash := v.Sum64()
   n := len(f.keys)
   hashes = make([]uint64, n, n)
   for i := 0; i < n; i++ {
@@ -236,7 +233,7 @@ func (f Filter) N() uint64 {
   return f.n
 }
 
-func (f *Filter) Add(v Hashable) {
+func (f *Filter) Add(v hash.Hash64) {
   for _, k := range f.hash(v) {
     f.setBit(k)
   }
@@ -254,7 +251,7 @@ func (f Filter) PreciseFilledRatio() float64 {
 
 // false: definitely false
 // true:  maybe true or false
-func (f Filter) Contains(v Hashable) bool {
+func (f Filter) Contains(v hash.Hash64) bool {
   for _, k := range f.hash(v) {
     if !f.getBit(k) {
       return false

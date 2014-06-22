@@ -7,7 +7,26 @@ import (
 
 type HashableUint64 uint64
 
-func (h HashableUint64) BloomFilterHash() uint64 {
+func (h HashableUint64) Write([]byte) (int, error) {
+  return 0, nil
+}
+
+func (h HashableUint64) Sum([]byte) []byte {
+  return nil
+}
+
+func (h HashableUint64) Reset() {
+}
+
+func (h HashableUint64) BlockSize() int {
+  return 0
+}
+
+func (h HashableUint64) Size() int {
+  return 0
+}
+
+func (h HashableUint64) Sum64() uint64 {
   return uint64(h)
 }
 
