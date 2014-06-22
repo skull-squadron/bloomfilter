@@ -88,22 +88,27 @@ func (f Filter) IsCompatible(f2 Filter) bool {
   if f.M() != f2.M() || f.K() != f2.K() {
     return false
   }
-  for i := range f.keys {
-    if f.keys[i] != f2.keys[i] {
+  for i, k := range f.keys {
+    if k != f2.keys[i] {
       return false
     }
   }
   return true
 }
 
-func (f Filter) Copy() (out *Filter) {
-  out = &Filter{
+func (f Filter) NewCompatible() *Filter {
+  out := &Filter{
     m:    f.m,
     n:    f.n,
     keys: make([]uint64, f.K()),
     bits: make([]uint64, (f.m+63)>>6),
   }
   copy(out.keys, f.keys)
+  return out
+}
+
+func (f Filter) Copy() *Filter {
+  out := f.NewCompatible()
   copy(out.bits, f.bits)
   return out
 }
