@@ -121,8 +121,8 @@ func (f *Filter) Union(f2 *Filter) (out *Filter, err error) {
     return
   }
 
-  f.rw.Lock()
-  defer f.rw.Unlock()
+  f.rw.RLock()
+  defer f.rw.RUnlock()
 
   f2.rw.RLock()
   defer f2.rw.RUnlock()
