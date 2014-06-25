@@ -276,8 +276,8 @@ func (f Filter) PreciseFilledRatio() float64 {
   return float64(ones) / float64(f.M())
 }
 
-// false: definitely false
-// true:  maybe true or false
+// false: definitely does not contain v
+// true:  maybe contains v
 func (f *Filter) Contains(v hash.Hash64) bool {
   f.rw.RLock()
   defer f.rw.RUnlock()
