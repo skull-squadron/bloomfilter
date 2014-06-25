@@ -11,6 +11,7 @@ import (
   "log"
   "math"
   "math/rand"
+  "sync"
   "time"
 )
 
@@ -19,6 +20,7 @@ const (
 )
 
 type Filter struct {
+  rw   sync.RWMutex
   bits []uint64
   keys []uint64
   m    uint64 // number of bits the "bits" field should recognize
@@ -81,7 +83,7 @@ func (f Filter) hash(v hash.Hash64) (hashes []uint64) {
   return
 }
 
-func (f Filter) IsCompatible(f2 Filter) bool {
+func (f *Filter) IsCompatible(f2 *Filter) bool {
   if f.M() != f2.M() || f.K() != f2.K() {
     return false
   }
@@ -105,16 +107,26 @@ func (f Filter) NewCompatible() *Filter {
 }
 
 func (f Filter) Copy() *Filter {
+  f.rw.RLock()
+  defer f.rw.RUnlock()
+
   out := f.NewCompatible()
   copy(out.bits, f.bits)
   return out
 }
 
-func (f Filter) Union(f2 Filter) (out *Filter, err error) {
+func (f *Filter) Union(f2 *Filter) (out *Filter, err error) {
   if !f.IsCompatible(f2) {
     err = errors.New("Cannot combine incompatible Bloom filters")
     return
   }
+
+  f.rw.Lock()
+  defer f.rw.Unlock()
+
+  f2.rw.RLock()
+  defer f2.rw.RUnlock()
+
   out = f.Copy()
   for i, x := range f2.bits {
     out.bits[i] |= x
@@ -144,7 +156,10 @@ func (f Filter) FalsePosititveProbability() float64 {
 //   keys
 //   bits
 //
-func (f Filter) MarshalBinary() (data []byte, err error) {
+func (f *Filter) MarshalBinary() (data []byte, err error) {
+  f.rw.RLock()
+  defer f.rw.RUnlock()
+
   k := f.K()
 
   size := binary.Size(k) + binary.Size(f.n) + binary.Size(f.m) + binary.Size(f.keys) + binary.Size(f.bits)
@@ -181,6 +196,9 @@ func (f Filter) MarshalBinary() (data []byte, err error) {
 }
 
 func (f *Filter) UnmarshalBinary(data []byte) (err error) {
+  f.rw.Lock()
+  defer f.rw.Unlock()
+
   var k uint32
 
   buf := bytes.NewBuffer(data)
@@ -230,10 +248,16 @@ func (f *Filter) setBit(i uint64) {
 
 // how many elements have been inserted (actually, how many Add()s have been performed?)
 func (f Filter) N() uint64 {
+  f.rw.RLock()
+  defer f.rw.RUnlock()
+
   return f.n
 }
 
 func (f *Filter) Add(v hash.Hash64) {
+  f.rw.Lock()
+  defer f.rw.Unlock()
+
   for _, k := range f.hash(v) {
     f.setBit(k)
   }
@@ -242,6 +266,9 @@ func (f *Filter) Add(v hash.Hash64) {
 
 // exhaustive count # of 1's
 func (f Filter) PreciseFilledRatio() float64 {
+  f.rw.RLock()
+  defer f.rw.RUnlock()
+
   ones := 0
   for _, b := range f.bits {
     ones += hamming.CountBitsUint64(b)
@@ -251,7 +278,10 @@ func (f Filter) PreciseFilledRatio() float64 {
 
 // false: definitely false
 // true:  maybe true or false
-func (f Filter) Contains(v hash.Hash64) bool {
+func (f *Filter) Contains(v hash.Hash64) bool {
+  f.rw.RLock()
+  defer f.rw.RUnlock()
+
   for _, k := range f.hash(v) {
     if !f.getBit(k) {
       return false
