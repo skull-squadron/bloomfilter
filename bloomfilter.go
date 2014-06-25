@@ -4,13 +4,16 @@ package bloomfilter
 
 import (
   "bytes"
+  "compress/gzip"
   "encoding/binary"
   "errors"
   "github.com/steakknife/hamming"
   "hash"
+  "io/ioutil"
   "log"
   "math"
   "math/rand"
+  "os"
   "sync"
   "time"
 )
@@ -288,4 +291,56 @@ func (f *Filter) Contains(v hash.Hash64) bool {
     }
   }
   return true // maybe
+}
+
+func ReadFile(filename string) (f *Filter, err error) {
+  fr, err := os.Open(filename)
+  if err != nil {
+    return
+  }
+  defer fr.Close()
+
+  r, err := gzip.NewReader(fr)
+  if err != nil {
+    return
+  }
+  defer r.Close()
+
+  content, err := ioutil.ReadAll(r)
+  if err != nil {
+    return
+  }
+
+  bf := new(Filter)
+  err = bf.UnmarshalBinary(content)
+  if err != nil {
+    return
+  }
+  f = bf
+  return
+}
+
+func (f *Filter) WriteFile(filename string) (err error) {
+  f.rw.RLock()
+  defer f.rw.RUnlock()
+
+  fw, err := os.Create(filename)
+  if err != nil {
+    return
+  }
+  defer fw.Close()
+
+  w := gzip.NewWriter(fw)
+  defer w.Close()
+
+  content, err := f.MarshalBinary()
+  if err != nil {
+    return
+  }
+
+  _, err = w.Write(content)
+  if err != nil {
+    return
+  }
+  return
 }
