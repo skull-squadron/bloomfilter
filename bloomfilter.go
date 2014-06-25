@@ -202,17 +202,17 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
   var k uint32
 
   buf := bytes.NewBuffer(data)
-  err = binary.Read(buf, binary.LittleEndian, k)
+  err = binary.Read(buf, binary.LittleEndian, &k)
   if err != nil {
     return
   }
 
-  err = binary.Read(buf, binary.LittleEndian, f.n)
+  err = binary.Read(buf, binary.LittleEndian, &f.n)
   if err != nil {
     return
   }
 
-  err = binary.Read(buf, binary.LittleEndian, f.m)
+  err = binary.Read(buf, binary.LittleEndian, &f.m)
   if err != nil {
     return
   }
