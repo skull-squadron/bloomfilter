@@ -220,6 +220,8 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
     return
   }
 
+  log.Printf("read bf k=%d n=%d m=%d\n", k, f.n, f.m)
+
   f.keys = make([]uint64, k, k)
   err = binary.Read(buf, binary.LittleEndian, f.keys)
   if err != nil {
