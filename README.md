@@ -1,4 +1,4 @@
-# A marshalable, unionable, probability and optimal-size calculating, BF in go
+# A marshalable, unionable, probability and optimal-size calculating Bloom filter in go
 
 Copyright © 2014, 2015 Barry Allard
 

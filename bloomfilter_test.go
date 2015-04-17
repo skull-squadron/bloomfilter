@@ -1,5 +1,5 @@
 //
-// A marshalable, unionable, probability and optimal-size calculating, BF in go
+// A marshalable, unionable, probability and optimal-size calculating Bloom filter in go
 //
 // https://github.com/steakknife/bloomfilter
 //
