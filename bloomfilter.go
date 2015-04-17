@@ -1,3 +1,12 @@
+//
+// A marshalable, unionable, probability and optimal-size calculating, BF in go
+//
+// https://github.com/steakknife/bloomfilter
+//
+// Copyright © 2014, 2015 Barry Allard
+//
+// MIT license
+//
 package bloomfilter
 
 // TODO probabilities, filled ratio
@@ -241,7 +250,7 @@ func (f Filter) getBit(i uint64) bool {
 	if i >= f.m {
 		i %= f.m
 	}
-	return (f.bits[i>>6] >> uint(i&0x3f)) != 0
+	return (f.bits[i>>6]>>uint(i&0x3f))&1 != 0
 }
 
 func (f *Filter) setBit(i uint64) {
@@ -283,12 +292,11 @@ func (f *Filter) Contains(v hash.Hash64) bool {
 	f.rw.RLock()
 	defer f.rw.RUnlock()
 
+	r := false
 	for _, k := range f.hash(v) {
-		if !f.getBit(k) {
-			return false
-		}
+		r = r || f.getBit(k)
 	}
-	return true // maybe
+	return r // maybe
 }
 
 func ReadFile(filename string) (f *Filter, err error) {
