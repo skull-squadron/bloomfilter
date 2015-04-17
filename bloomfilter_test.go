@@ -1,5 +1,5 @@
 //
-// A marshalable, unionable, probability and optimal-size calculating Bloom filter in go
+// A blindly-fast, thread-safe, marshalable, unionable, probability and optimal-size calculating Bloom filter in go
 //
 // https://github.com/steakknife/bloomfilter
 //
@@ -14,32 +14,7 @@ import (
 	"testing"
 )
 
-type HashableUint64 uint64
-
-func (h HashableUint64) Write([]byte) (int, error) {
-	return 0, nil
-}
-
-func (h HashableUint64) Sum([]byte) []byte {
-	return nil
-}
-
-func (h HashableUint64) Reset() {
-}
-
-func (h HashableUint64) BlockSize() int {
-	return 0
-}
-
-func (h HashableUint64) Size() int {
-	return 0
-}
-
-func (h HashableUint64) Sum64() uint64 {
-	return uint64(h)
-}
-
-var hashableUint64Values = []HashableUint64{
+var hashableUint64Values = []hashableUint64{
 	0,
 	7,
 	0x0c0ffee0,
