@@ -16,13 +16,15 @@ import (
 
 // conforms to encoding.BinaryMarshaler
 
-// marshalled binary layout:
+// marshalled binary layout (Little Endian):
 //
-//   k
-//   n
-//   m
-//   keys
-//   bits
+//   k      1 uint64
+//   n      1 uint64
+//   m      1 uint64
+//   keys   [k]uint64
+//   bits   [(m+63)/64]uint64
+//
+//   size = (3 + k + (m+63)/64) * 8 bytes
 //
 func (f *Filter) MarshalBinary() (data []byte, err error) {
 	f.lock.RLock()
