@@ -18,9 +18,13 @@ const (
 bf := bloomfilter.NewOptimal(maxElements, probCollide)
 
 bf.Add(someValue)
-bf.Contains(someValue) // probably true, could be false
+if bf.Contains(someValue) { // probably true, could be false
+  // whatever
+}
 
-bf.Contains(anotherValue) // false
+if bf.Contains(anotherValue) {
+  panic("This should never happen")
+}
 
 err := bf.WriteFile("1.bf.gz")  // saves this BF to a file
 if err != nil {
