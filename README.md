@@ -15,7 +15,7 @@ const (
   probCollide = 0.0000001
 )
 
-bf = bloomfilter.NewOptimal(maxElements, probCollide)
+bf := bloomfilter.NewOptimal(maxElements, probCollide)
 
 bf.Add(someValue)
 bf.Contains(someValue) // probably true, could be false
@@ -27,7 +27,7 @@ if err != nil {
   panic(err)
 }
 
-bf2, err := bf.ReadFile("1.bf.gz") // read the BF to another var
+bf2, err := bloomfilter.ReadFile("1.bf.gz") // read the BF to another var
 if err != nil {
   panic(err)
 }
