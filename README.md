@@ -1,4 +1,4 @@
-# A blindly-fast, thread-safe, marshalable, unionable, probability and optimal-size calculating Bloom filter in go
+# A blindingly-fast, thread-safe, marshalable, unionable, probability- and optimal-size-calculating Bloom filter in go
 
 Copyright © 2014, 2015 Barry Allard
 
