@@ -20,7 +20,7 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 
-	var k uint32
+	var k uint64
 
 	buf := bytes.NewBuffer(data)
 	if err = binary.Read(buf, binary.LittleEndian, &k); err != nil {
