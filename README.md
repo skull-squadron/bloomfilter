@@ -6,6 +6,38 @@ Copyright © 2014, 2015 Barry Allard
 
 ## Usage
 
+```go
+
+import "github.com/steakknife/bloomfilter"
+
+const (
+  maxElements = 100000
+  probCollide = 0.0000001
+)
+
+bf = bloomfilter.NewOptimal(maxElements, probCollide)
+
+bf.Add(someValue)
+bf.Contains(someValue) // probably true, could be false
+
+bf.Contains(anotherValue) // false
+
+err := bf.WriteFile("1.bf.gz")  // saves this BF to a file
+if err != nil {
+  panic(err)
+}
+
+bf2, err := bf.ReadFile("1.bf.gz") // read the BF to another var
+if err != nil {
+  panic(err)
+}
+```
+
+
+## Design
+
+Where possible, branch-free operations are used to avoid deep pipeline / execution unit stalls on branch misses.
+
 ## Get
 
     go get -u github.com/steakknife/bloomfilter  # master is always stable
