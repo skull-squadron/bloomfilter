@@ -22,7 +22,7 @@ var hashableUint64Values = []hashableUint64{
 	0xffffffff,
 }
 
-var hashableUint64NotValues = []HashableUint64{
+var hashableUint64NotValues = []hashableUint64{
 	1,
 	5,
 	42,
@@ -63,7 +63,7 @@ func BenchmarkAddX10kX5(b *testing.B) {
 	bf := New(10000, 5)
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		bf.Add(HashableUint64(rand.Uint32()))
+		bf.Add(hashableUint64(rand.Uint32()))
 	}
 }
 
@@ -71,11 +71,11 @@ func BenchmarkContains1kX10kX5(b *testing.B) {
 	b.StopTimer()
 	bf := New(10000, 5)
 	for i := 0; i < 1000; i++ {
-		bf.Add(HashableUint64(rand.Uint32()))
+		bf.Add(hashableUint64(rand.Uint32()))
 	}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		bf.Contains(HashableUint64(rand.Uint32()))
+		bf.Contains(hashableUint64(rand.Uint32()))
 	}
 }
 
@@ -83,10 +83,10 @@ func BenchmarkContains100kX10BX20(b *testing.B) {
 	b.StopTimer()
 	bf := New(10*1000*1000*1000, 20)
 	for i := 0; i < 100*1000; i++ {
-		bf.Add(HashableUint64(rand.Uint32()))
+		bf.Add(hashableUint64(rand.Uint32()))
 	}
 	b.StartTimer()
 	for i := 0; i < b.N; i++ {
-		bf.Contains(HashableUint64(rand.Uint32()))
+		bf.Contains(hashableUint64(rand.Uint32()))
 	}
 }
