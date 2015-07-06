@@ -11,6 +11,7 @@ package bloomfilter
 
 import (
 	"bytes"
+	"crypto/sha512"
 	"encoding/binary"
 )
 
@@ -23,6 +24,7 @@ import (
 //   m      1 uint64
 //   keys   [k]uint64
 //   bits   [(m+63)/64]uint64
+//   hash   sha384 (384 bits == 48 bytes)
 //
 //   size = (3 + k + (m+63)/64) * 8 bytes
 //
@@ -49,6 +51,10 @@ func (f *Filter) MarshalBinary() (data []byte, err error) {
 	}
 
 	if err = binary.Write(buf, binary.LittleEndian, f.bits); err != nil {
+		return nil, err
+	}
+
+	if err = binary.Write(buf, binary.LittleEndian, sha512.Sum384(buf.Bytes())); err != nil {
 		return nil, err
 	}
 

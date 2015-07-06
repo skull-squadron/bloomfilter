@@ -11,8 +11,13 @@ package bloomfilter
 
 import (
 	"bytes"
+	"crypto/hmac"
+	"crypto/sha512"
 	"encoding/binary"
+	"errors"
 )
+
+var hashError = errors.New("Hash mismatch, the bloomfilter is probably corrupt.")
 
 // conforms to encoding.BinaryUnmarshaler
 
@@ -45,6 +50,17 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 	f.bits = make([]uint64, f.n)
 	if err = binary.Read(buf, binary.LittleEndian, f.bits); err != nil {
 		return err
+	}
+
+	expectedHash := make([]byte, sha512.Size384)
+	if err = binary.Read(buf, binary.LittleEndian, expectedHash); err != nil {
+		return err
+	}
+
+	actualHash := sha512.Sum384(data[:len(data)-sha512.Size384])
+
+	if !hmac.Equal(expectedHash, actualHash[:]) {
+		return hashError
 	}
 
 	return nil
