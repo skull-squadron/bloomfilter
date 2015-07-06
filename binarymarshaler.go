@@ -54,9 +54,13 @@ func (f *Filter) MarshalBinary() (data []byte, err error) {
 		return nil, err
 	}
 
-	if err = binary.Write(buf, binary.LittleEndian, sha512.Sum384(buf.Bytes())); err != nil {
+	hash := sha512.Sum384(buf.Bytes())
+	if err = binary.Write(buf, binary.LittleEndian, hash); err != nil {
 		return nil, err
 	}
 
-	return buf.Bytes(), nil
+	bytes := buf.Bytes()
+	debug("bloomfilter.MarshalBinary: Successfully wrote %d byte(s), sha384 %v", bytes, hash)
+
+	return bytes, nil
 }
