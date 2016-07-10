@@ -8,7 +8,7 @@ Copyright © 2014-2016 Barry Allard
 
 ## WTF is a bloom filter
 
-**TL;DR: **Probabilistic, extra lookup table to track a set of elements kept elsewhere to reduce expensive, unnecessary set element retrieval and/or iterator operations **when an element is not present in the set.**
+**TL;DR: **Probabilistic, extra lookup table to track a set of elements kept elsewhere to reduce expensive, unnecessary set element retrieval and/or iterator operations **when an element is not present in the set.** It's a classic time-storage tradeoff algoritm.
 
 ### Properties
 
@@ -19,6 +19,7 @@ Copyright © 2014-2016 Barry Allard
 |Good|No false negatives|know for certain if a given element is definitely NOT in the set|
 |Bad|False positives|uncertain if a given element is in the set|
 |Bad|Theoretical potential for hash collisions|in very large systems and/or badly hash.Hash64-conforming implementations|
+|Bad|Add only|Cannot remove an element, it would destroy information about other elements|
 |Good|Constant storage|uses only a fixed amount of memory|
 
 ## Naming conventions
@@ -28,6 +29,7 @@ Copyright © 2014-2016 Barry Allard
 |Variable/function|Description|Range|
 |---|---|---|
 |m/M()|number of bits in the bloom filter (memory representation is about m/8 bytes in size)|>0|
+|n/N()|number of elements present|>=0|
 |k/K()|number of keys to use (keys are kept private to user code but are de/serialized to Marshal and file I/O)|>0|
 |maxN|maximum capacity of intended structure|>0|
 |p|maximum allowed probability of collision (for computing m and k for optimal sizing)|>0..<1|
