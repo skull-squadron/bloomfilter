@@ -19,6 +19,9 @@ const (
 
 bf := bloomfilter.NewOptimal(maxElements, probCollide)
 
+// someValue = ...
+// someValue must conform to hash.Hash64
+
 bf.Add(someValue)
 if bf.Contains(someValue) { // probably true, could be false
   // whatever
