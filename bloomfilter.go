@@ -10,7 +10,6 @@
 package bloomfilter
 
 import (
-	"errors"
 	"hash"
 	"sync"
 )
@@ -23,8 +22,6 @@ type Filter struct {
 	m    uint64 // number of bits the "bits" field should recognize
 	n    uint64 // number of inserted elements
 }
-
-var incompatibleBloomFilters = errors.New("Cannot perform union on two incompatible Bloom filters")
 
 // Hashable -> hashes
 func (f Filter) hash(v hash.Hash64) []uint64 {
@@ -89,14 +86,11 @@ func (f *Filter) Copy() *Filter {
 // merge Bloom filter f2 into f
 func (f *Filter) UnionInPlace(f2 *Filter) error {
 	if !f.IsCompatible(f2) {
-		return incompatibleBloomFilters
+		return incompatibleBloomFiltersError
 	}
 
 	f.lock.Lock()
 	defer f.lock.Unlock()
-
-	f2.lock.RLock()
-	defer f2.lock.RUnlock()
 
 	for i, bitword := range f2.bits {
 		f.bits[i] |= bitword
@@ -105,10 +99,17 @@ func (f *Filter) UnionInPlace(f2 *Filter) error {
 }
 
 // out is a copy of f unioned with f2
-func (f *Filter) Union(f2 *Filter) (*Filter, error) {
-	out := f.Copy()
-	if err := out.UnionInPlace(f2); err != nil {
-		return nil, err
+func (f *Filter) Union(f2 *Filter) (out *Filter, err error) {
+	if !f.IsCompatible(f2) {
+		return nil, incompatibleBloomFiltersError
 	}
-	return out, nil
+
+	f.lock.RLock()
+	defer f.lock.RUnlock()
+
+	out = f.NewCompatible()
+	for i, bitword := range f2.bits {
+		out.bits[i] = f.bits[i] | bitword
+	}
+	return
 }

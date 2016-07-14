@@ -28,11 +28,14 @@ Copyright © 2014-2016 Barry Allard
 
 |Variable/function|Description|Range|
 |---|---|---|
-|m/M()|number of bits in the bloom filter (memory representation is about m/8 bytes in size)|>0|
+|m/M()|number of bits in the bloom filter (memory representation is about m/8 bytes in size)|>=2|
 |n/N()|number of elements present|>=0|
-|k/K()|number of keys to use (keys are kept private to user code but are de/serialized to Marshal and file I/O)|>0|
+|k/K()|number of keys to use (keys are kept private to user code but are de/serialized to Marshal and file I/O)|>=0|
 |maxN|maximum capacity of intended structure|>0|
 |p|maximum allowed probability of collision (for computing m and k for optimal sizing)|>0..<1|
+
+- Memory representation should be exactly `24 + 8*(k + (m+63)/64) + unsafe.Sizeof(RWMutex)` bytes.
+- Serialized (`BinaryMarshaler`) representation should be exactly `72 + 8*(k + (m+63)/64)` bytes. (Disk format is less due to compression.)
 
 ## Binary serialization format
 
@@ -47,6 +50,7 @@ All values in Little-endian format
 |24+8*k|...|(m+63)/64|(bloom filter)|`[(m+63)/64]uint64`|
 |24+8\*k+8\*((m+63)/64)|...|48|(SHA384 of all previous fields, hashed in order)|`[48]byte`|
 
+- `bloomfilter.Filter` conforms to `encoding.BinaryMarshaler` and `encoding.BinaryUnmarshaler'
 
 ## Usage
 

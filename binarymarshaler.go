@@ -28,39 +28,50 @@ import (
 //
 //   size = (3 + k + (m+63)/64) * 8 bytes
 //
-func (f *Filter) MarshalBinary() (data []byte, err error) {
+
+func (f *Filter) marshal() (buf *bytes.Buffer, hash [sha512.Size384]byte, err error) {
 	f.lock.RLock()
 	defer f.lock.RUnlock()
 
-	buf := new(bytes.Buffer)
+	buf = new(bytes.Buffer)
 
-	if err = binary.Write(buf, binary.LittleEndian, f.K()); err != nil {
-		return nil, err
+	err = binary.Write(buf, binary.LittleEndian, f.K())
+	if err != nil {
+		return
 	}
 
-	if err = binary.Write(buf, binary.LittleEndian, f.n); err != nil {
-		return nil, err
+	err = binary.Write(buf, binary.LittleEndian, f.n)
+	if err != nil {
+		return
 	}
 
-	if err = binary.Write(buf, binary.LittleEndian, f.m); err != nil {
-		return nil, err
+	err = binary.Write(buf, binary.LittleEndian, f.m)
+	if err != nil {
+		return
 	}
 
-	if err = binary.Write(buf, binary.LittleEndian, f.keys); err != nil {
-		return nil, err
+	err = binary.Write(buf, binary.LittleEndian, f.keys)
+	if err != nil {
+		return
 	}
 
-	if err = binary.Write(buf, binary.LittleEndian, f.bits); err != nil {
-		return nil, err
+	err = binary.Write(buf, binary.LittleEndian, f.bits)
+	if err != nil {
+		return
 	}
 
-	hash := sha512.Sum384(buf.Bytes())
-	if err = binary.Write(buf, binary.LittleEndian, hash); err != nil {
-		return nil, err
+	hash = sha512.Sum384(buf.Bytes())
+	err = binary.Write(buf, binary.LittleEndian, hash)
+	return
+}
+
+func (f *Filter) MarshalBinary() (data []byte, err error) {
+	buf, hash, err := f.marshal()
+	if err != nil {
+		return
 	}
 
-	bytes := buf.Bytes()
-	debug("bloomfilter.MarshalBinary: Successfully wrote %d byte(s), sha384 %v", bytes, hash)
+	debug("bloomfilter.MarshalBinary: Successfully wrote %d byte(s), sha384 %v", buf.Len(), hash)
 
-	return bytes, nil
+	return
 }

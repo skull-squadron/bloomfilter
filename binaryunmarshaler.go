@@ -14,10 +14,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha512"
 	"encoding/binary"
-	"errors"
 )
-
-var hashError = errors.New("Hash mismatch, the bloomfilter is probably corrupt.")
 
 // conforms to encoding.BinaryUnmarshaler
 
@@ -28,33 +25,47 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 	var k uint64
 
 	buf := bytes.NewBuffer(data)
-	if err = binary.Read(buf, binary.LittleEndian, &k); err != nil {
-		return err
+	err = binary.Read(buf, binary.LittleEndian, &k)
+	if err != nil {
+		return
 	}
 
-	if err = binary.Read(buf, binary.LittleEndian, &(f.n)); err != nil {
-		return err
+	if k < K_MIN {
+		return kError
 	}
 
-	if err = binary.Read(buf, binary.LittleEndian, &(f.m)); err != nil {
-		return err
+	err = binary.Read(buf, binary.LittleEndian, &(f.n))
+	if err != nil {
+		return
+	}
+
+	err = binary.Read(buf, binary.LittleEndian, &(f.m))
+	if err != nil {
+		return
+	}
+
+	if f.m < M_MIN {
+		return mError
 	}
 
 	debug("read bf k=%d n=%d m=%d\n", k, f.n, f.m)
 
 	f.keys = make([]uint64, k)
-	if err = binary.Read(buf, binary.LittleEndian, f.keys); err != nil {
-		return err
+	err = binary.Read(buf, binary.LittleEndian, f.keys)
+	if err != nil {
+		return
 	}
 
 	f.bits = make([]uint64, f.n)
-	if err = binary.Read(buf, binary.LittleEndian, f.bits); err != nil {
-		return err
+	err = binary.Read(buf, binary.LittleEndian, f.bits)
+	if err != nil {
+		return
 	}
 
 	expectedHash := make([]byte, sha512.Size384)
-	if err = binary.Read(buf, binary.LittleEndian, expectedHash); err != nil {
-		return err
+	err = binary.Read(buf, binary.LittleEndian, expectedHash)
+	if err != nil {
+		return
 	}
 
 	actualHash := sha512.Sum384(data[:len(data)-sha512.Size384])
