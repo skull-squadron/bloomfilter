@@ -1,3 +1,6 @@
+**Important**: Zeroth, [consider](https://bdupras.github.io/filter-tutorial/) if a [Cuckoo filter](https://www.cs.cmu.edu/~dga/papers/cuckoo-conext2014.pdf) is [right for you](https://github.com/seiflotfy/cuckoofilter).
+
+
 [![GoDoc](https://godoc.org/github.com/steakknife/bloomfilter?status.png)](https://godoc.org/github.com/steakknife/bloomfilter)
 
 # Face-meltingly fast, thread-safe, marshalable, unionable, probability- and optimal-size-calculating Bloom filter in go
