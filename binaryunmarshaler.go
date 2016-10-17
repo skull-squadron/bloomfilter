@@ -50,13 +50,24 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 
 	debug("read bf k=%d n=%d m=%d\n", k, f.n, f.m)
 
-	f.keys = make([]uint64, k)
+	var kLen uint64
+	err = binary.Read(buf, binary.LittleEndian, &kLen)
+	if err != nil {
+		return
+	}
+	f.keys = make([]uint64, kLen)
 	err = binary.Read(buf, binary.LittleEndian, f.keys)
 	if err != nil {
 		return
 	}
 
-	f.bits = make([]uint64, f.n)
+	var bLen uint64
+	err = binary.Read(buf, binary.LittleEndian, &bLen)
+	if err != nil {
+		return
+	}
+
+	f.bits = make([]uint64, bLen)
 	err = binary.Read(buf, binary.LittleEndian, f.bits)
 	if err != nil {
 		return
