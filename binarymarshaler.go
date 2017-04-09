@@ -52,23 +52,11 @@ func (f *Filter) marshal() (buf *bytes.Buffer, hash [sha512.Size384]byte, err er
 		return
 	}
 
-	kLen := uint64(len(f.keys))
-	debug("write bf kLen%d", kLen)
-	err = binary.Write(buf, binary.LittleEndian, kLen)
-	if err != nil {
-		return
-	}
 	err = binary.Write(buf, binary.LittleEndian, f.keys)
 	if err != nil {
 		return
 	}
 
-	bLen := uint64(len(f.bits))
-	debug("write bf bLen%d", bLen)
-	err = binary.Write(buf, binary.LittleEndian, bLen)
-	if err != nil {
-		return
-	}
 	err = binary.Write(buf, binary.LittleEndian, f.bits)
 	if err != nil {
 		return
