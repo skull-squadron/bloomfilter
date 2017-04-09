@@ -33,7 +33,7 @@ func ReadFrom(r io.Reader) (f *Filter, n int64, err error) {
 	}
 	defer rawR.Close()
 
-	content, err := ioutil.ReadAll(r)
+	content, err := ioutil.ReadAll(rawR)
 	if err != nil {
 		return
 	}
