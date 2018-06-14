@@ -15,7 +15,7 @@ import (
 )
 
 // exhaustive count # of 1's
-func (f Filter) PreciseFilledRatio() float64 {
+func (f *Filter) PreciseFilledRatio() float64 {
 	f.lock.RLock()
 	defer f.lock.RUnlock()
 
@@ -23,7 +23,7 @@ func (f Filter) PreciseFilledRatio() float64 {
 }
 
 // how many elements have been inserted (actually, how many Add()s have been performed?)
-func (f Filter) N() uint64 {
+func (f *Filter) N() uint64 {
 	f.lock.RLock()
 	defer f.lock.RUnlock()
 
@@ -32,6 +32,6 @@ func (f Filter) N() uint64 {
 
 // Upper-bound of probability of false positives
 //  (1 - exp(-k*(n+0.5)/(m-1))) ** k
-func (f Filter) FalsePosititveProbability() float64 {
+func (f *Filter) FalsePosititveProbability() float64 {
 	return math.Pow(1.0-math.Exp(float64(-f.K())*(float64(f.N())+0.5)/float64(f.M()-1)), float64(f.K()))
 }
