@@ -66,13 +66,13 @@ func UniqueKeys(keys []uint64) bool {
 // new with user-supplied keys
 func NewWithKeys(m uint64, keys []uint64) *Filter {
 	if m < M_MIN {
-		panic(mError)
+		panic(errM)
 	}
 	if len(keys) < K_MIN {
-		panic(kError)
+		panic(errK)
 	}
 	if !UniqueKeys(keys) {
-		panic(uniqueKeysError)
+		panic(errUniqueKeys)
 	}
 	return &Filter{
 		m:    m,
