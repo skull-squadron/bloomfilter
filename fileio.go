@@ -34,9 +34,6 @@ func ReadFrom(r io.Reader) (f *Filter, n int64, err error) {
 	}
 	defer func() {
 		err = rawR.Close()
-		if err != nil {
-			return nil, -1, err
-		}
 	}()
 
 	content, err := ioutil.ReadAll(rawR)
