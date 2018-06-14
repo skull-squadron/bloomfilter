@@ -27,7 +27,7 @@ func (f *Filter) MarshalText() (text []byte, err error) {
 
 	_, hash, err := f.marshal()
 	if err != nil {
-		return
+		return nil, err
 	}
 	s += fmt.Sprintln("sha384")
 	for b := range hash {
@@ -36,5 +36,5 @@ func (f *Filter) MarshalText() (text []byte, err error) {
 	s += nl
 
 	text = []byte(s)
-	return
+	return text, nil
 }
