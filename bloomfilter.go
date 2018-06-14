@@ -111,5 +111,5 @@ func (f *Filter) Union(f2 *Filter) (out *Filter, err error) {
 	for i, bitword := range f2.bits {
 		out.bits[i] = f.bits[i] | bitword
 	}
-	return
+	return out, nil
 }
