@@ -54,7 +54,7 @@ func (f *Filter) marshal() (buf *bytes.Buffer, hash [sha512.Size384]byte, err er
 
 	err = binary.Write(buf, binary.LittleEndian, f.keys)
 	if err != nil {
-		return nil, haah, err
+		return nil, hash, err
 	}
 
 	err = binary.Write(buf, binary.LittleEndian, f.bits)
