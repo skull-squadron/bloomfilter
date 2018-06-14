@@ -25,7 +25,7 @@ func UnmarshalText(text []byte) (f *Filter, err error) {
 
 	_, err = fmt.Fscanf(r, format, k, n, m)
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	if m < M_MIN {
@@ -46,25 +46,25 @@ func UnmarshalText(text []byte) (f *Filter, err error) {
 	for i := range f.keys {
 		_, err = fmt.Fscanf(r, keyFormat, f.keys[i])
 		if err != nil {
-			return
+			return nil, err
 		}
 	}
 
 	_, err = fmt.Fscanf(r, "bits")
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	for i := range f.bits {
 		_, err = fmt.Fscanf(r, bitsFormat, f.bits[i])
 		if err != nil {
-			return
+			return nil, err
 		}
 	}
 
 	_, err = fmt.Fscanf(r, "sha384")
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	actualHash := [sha512.Size384]byte{}
@@ -72,20 +72,20 @@ func UnmarshalText(text []byte) (f *Filter, err error) {
 	for i := range actualHash {
 		_, err = fmt.Fscanf(r, "%02x", actualHash[i])
 		if err != nil {
-			return
+			return nil, err
 		}
 	}
 
 	_, expectedHash, err := f.marshal()
 	if err != nil {
-		return
+		return nil, err
 	}
 
 	if !hmac.Equal(expectedHash[:], actualHash[:]) {
 		return nil, errHash
 	}
 
-	return
+	return f, nil
 }
 
 func (f *Filter) UnmarshalText(text []byte) (err error) {
@@ -94,7 +94,7 @@ func (f *Filter) UnmarshalText(text []byte) (err error) {
 
 	f2, err := UnmarshalText(text)
 	if err != nil {
-		return
+		return err
 	}
 
 	f.m = f2.m
@@ -102,5 +102,5 @@ func (f *Filter) UnmarshalText(text []byte) (err error) {
 	copy(f.bits, f2.bits)
 	copy(f.keys, f2.keys)
 
-	return
+	return nil
 }
