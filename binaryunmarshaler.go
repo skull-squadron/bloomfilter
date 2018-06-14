@@ -27,7 +27,7 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 	buf := bytes.NewBuffer(data)
 	err = binary.Read(buf, binary.LittleEndian, &k)
 	if err != nil {
-		return
+		return err
 	}
 
 	if k < K_MIN {
@@ -36,12 +36,12 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 
 	err = binary.Read(buf, binary.LittleEndian, &(f.n))
 	if err != nil {
-		return
+		return err
 	}
 
 	err = binary.Read(buf, binary.LittleEndian, &(f.m))
 	if err != nil {
-		return
+		return err
 	}
 
 	if f.m < M_MIN {
@@ -53,19 +53,19 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 	f.keys = make([]uint64, k)
 	err = binary.Read(buf, binary.LittleEndian, f.keys)
 	if err != nil {
-		return
+		return err
 	}
 
 	f.bits = make([]uint64, f.n)
 	err = binary.Read(buf, binary.LittleEndian, f.bits)
 	if err != nil {
-		return
+		return err
 	}
 
 	expectedHash := make([]byte, sha512.Size384)
 	err = binary.Read(buf, binary.LittleEndian, expectedHash)
 	if err != nil {
-		return
+		return err
 	}
 
 	actualHash := sha512.Sum384(data[:len(data)-sha512.Size384])
