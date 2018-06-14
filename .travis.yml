@@ -11,3 +11,8 @@ language: go
     - "1.9.x"
     - "1.10.x"
     - master
+  after_setup:  
+    - "if go version | grep -q '1\.(10|9|8)'; then; go get -u gopkg.in/alecthomas/gometalinter.v2 && gometalinter.v2 --install; fi"
+  script:
+    - "go test -bench=. ."
+    - "if which gometalinter.v2 >/dev/null 2>&1; then; gometalinter.v2 .; fi"
