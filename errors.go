@@ -14,9 +14,9 @@ import (
 )
 
 var (
-	hashError                     = fmt.Errorf("Hash mismatch, the Bloom filter is probably corrupt.")
-	kError                        = fmt.Errorf("keys must have length %d or greater", K_MIN)
-	mError                        = fmt.Errorf("m (number of bits in the Bloom filter) must be >= %d", M_MIN)
-	uniqueKeysError               = fmt.Errorf("Bloom filter keys must be unique")
-	incompatibleBloomFiltersError = fmt.Errorf("Cannot perform union on two incompatible Bloom filters")
+	errHash                     = fmt.Errorf("Hash mismatch, the Bloom filter is probably corrupt.")
+	errK                        = fmt.Errorf("keys must have length %d or greater", K_MIN)
+	errM                        = fmt.Errorf("m (number of bits in the Bloom filter) must be >= %d", M_MIN)
+	errUniqueKeys               = fmt.Errorf("Bloom filter keys must be unique")
+	errIncompatibleBloomFilters = fmt.Errorf("Cannot perform union on two incompatible Bloom filters")
 )
