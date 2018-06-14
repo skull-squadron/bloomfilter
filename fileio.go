@@ -20,37 +20,37 @@ import (
 func (f *Filter) ReadFrom(r io.Reader) (n int64, err error) {
 	f2, n, err := ReadFrom(r)
 	if err != nil {
-		return
+		return -1, err
 	}
 	*f = *f2
-	return
+	return n, nil
 }
 
 // Read a lossless-compressed Bloom filter from Reader
 func ReadFrom(r io.Reader) (f *Filter, n int64, err error) {
 	rawR, err := gzip.NewReader(r)
 	if err != nil {
-		return
+		return nil, -1, err
 	}
 	defer func() {
 		err = rawR.Close()
 		if err != nil {
-			return
+			return nil, -1, err
 		}
 	}()
 
 	content, err := ioutil.ReadAll(rawR)
 	if err != nil {
-		return
+		return nil, -1, err
 	}
 
 	f = new(Filter)
 	n = int64(len(content))
 	err = f.UnmarshalBinary(content)
 	if err != nil {
-		f = nil
+		return nil, -1, err
 	}
-	return
+	return f, n, nil
 }
 
 // Read a lossless-compressed Bloom filter to a file
@@ -58,12 +58,12 @@ func ReadFrom(r io.Reader) (f *Filter, n int64, err error) {
 func ReadFile(filename string) (_ *Filter, n int64, err error) {
 	r, err := os.Open(filename)
 	if err != nil {
-		return
+		return nil, -1, err
 	}
 	defer func() {
 		err = r.Close()
 		if err != nil {
-			return
+			return nil, -1, err
 		}
 	}()
 
@@ -79,18 +79,18 @@ func (f *Filter) WriteTo(w io.Writer) (n int64, err error) {
 	defer func() {
 		err = rawW.Close()
 		if err != nil {
-			return
+			return -1, err
 		}
 	}()
 
 	content, err := f.MarshalBinary()
 	if err != nil {
-		return
+		return -1, err
 	}
 
 	intN, err := rawW.Write(content)
 	n = int64(intN)
-	return
+	return n, err
 }
 
 // Write a lossless-compressed Bloom filter to a file
@@ -98,12 +98,12 @@ func (f *Filter) WriteTo(w io.Writer) (n int64, err error) {
 func (f *Filter) WriteFile(filename string) (n int64, err error) {
 	w, err := os.Create(filename)
 	if err != nil {
-		return
+		return -1, err
 	}
 	defer func() {
 		err = w.Close()
 		if err != nil {
-			return
+			return -1, err
 		}
 	}()
 
