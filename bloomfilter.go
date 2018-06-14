@@ -3,7 +3,7 @@
 //
 // https://github.com/steakknife/bloomfilter
 //
-// Copyright © 2014, 2015 Barry Allard
+// Copyright © 2014, 2015, 2018 Barry Allard
 //
 // MIT license
 //
@@ -24,7 +24,7 @@ type Filter struct {
 }
 
 // Hashable -> hashes
-func (f Filter) hash(v hash.Hash64) []uint64 {
+func (f *Filter) hash(v hash.Hash64) []uint64 {
 	rawHash := v.Sum64()
 	n := len(f.keys)
 	hashes := make([]uint64, n)
@@ -35,12 +35,12 @@ func (f Filter) hash(v hash.Hash64) []uint64 {
 }
 
 // return size of Bloom filter, in bits
-func (f Filter) M() uint64 {
+func (f *Filter) M() uint64 {
 	return f.m
 }
 
 // return count of keys
-func (f Filter) K() uint64 {
+func (f *Filter) K() uint64 {
 	return uint64(len(f.keys))
 }
 
