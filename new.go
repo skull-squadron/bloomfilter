@@ -39,7 +39,7 @@ func newRandKeys(k uint64) []uint64 {
 }
 
 // Create a new Filter compatible with f
-func (f Filter) NewCompatible() *Filter {
+func (f *Filter) NewCompatible() *Filter {
 	return NewWithKeys(f.m, f.keys)
 }
 
