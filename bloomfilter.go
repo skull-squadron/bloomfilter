@@ -86,7 +86,7 @@ func (f *Filter) Copy() *Filter {
 // merge Bloom filter f2 into f
 func (f *Filter) UnionInPlace(f2 *Filter) error {
 	if !f.IsCompatible(f2) {
-		return incompatibleBloomFiltersError
+		return errIncompatibleBloomFilters
 	}
 
 	f.lock.Lock()
