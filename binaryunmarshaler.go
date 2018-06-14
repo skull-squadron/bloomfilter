@@ -31,7 +31,7 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 	}
 
 	if k < K_MIN {
-		return kError
+		return errK
 	}
 
 	err = binary.Read(buf, binary.LittleEndian, &(f.n))
@@ -45,7 +45,7 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 	}
 
 	if f.m < M_MIN {
-		return mError
+		return errM
 	}
 
 	debug("read bf k=%d n=%d m=%d\n", k, f.n, f.m)
@@ -72,10 +72,9 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 
 	if !hmac.Equal(expectedHash, actualHash[:]) {
 		debug("bloomfilter.UnmarshalBinary() sha384 hash failed: actual %v  expected %v", actualHash, expectedHash)
-		return hashError
+		return errHash
 	}
 
 	debug("bloomfilter.UnmarshalBinary() successfully read %d byte(s), sha384 %v", len(data), actualHash)
-
 	return nil
 }
