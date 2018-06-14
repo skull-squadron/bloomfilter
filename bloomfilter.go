@@ -101,7 +101,7 @@ func (f *Filter) UnionInPlace(f2 *Filter) error {
 // out is a copy of f unioned with f2
 func (f *Filter) Union(f2 *Filter) (out *Filter, err error) {
 	if !f.IsCompatible(f2) {
-		return nil, incompatibleBloomFiltersError
+		return nil, errIncompatibleBloomFilters
 	}
 
 	f.lock.RLock()
