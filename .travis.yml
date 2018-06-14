@@ -1,18 +1,18 @@
 language: go
-  dist: trusty
-  sudo: false
-  go:
-    - "1.3.x"
-    - "1.4.x"
-    - "1.5.x"
-    - "1.6.x"
-    - "1.7.x"
-    - "1.8.x"
-    - "1.9.x"
-    - "1.10.x"
-    - master
-  after_setup:  
-    - "if go version | grep -q '1\\.(10|9|8)'; then; go get -u gopkg.in/alecthomas/gometalinter.v2 && gometalinter.v2 --install; fi"
-  script:
-    - "go test -cover -benchmem -bench $(go list ./... | grep -v /vendor/)"
-    - "if which gometalinter.v2 >/dev/null 2>&1; then; gometalinter.v2 --enable-all ./...; fi"
+dist: trusty
+sudo: false
+go:
+  - "1.3.x"
+  - "1.4.x"
+  - "1.5.x"
+  - "1.6.x"
+  - "1.7.x"
+  - "1.8.x"
+  - "1.9.x"
+  - "1.10.x"
+  - master
+after_setup:  
+  - "if go version | grep -q '1\\.(10|9|8)'; then; go get -u gopkg.in/alecthomas/gometalinter.v2 && gometalinter.v2 --install; fi"
+script:
+  - "go test -cover -benchmem -bench $(go list ./... | grep -v /vendor/)"
+  - "if which gometalinter.v2 >/dev/null 2>&1; then; gometalinter.v2 --enable-all ./...; fi"
