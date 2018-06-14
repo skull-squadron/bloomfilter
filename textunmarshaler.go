@@ -82,7 +82,7 @@ func UnmarshalText(text []byte) (f *Filter, err error) {
 	}
 
 	if !hmac.Equal(expectedHash[:], actualHash[:]) {
-		return nil, hashError
+		return nil, errHash
 	}
 
 	return
