@@ -39,27 +39,27 @@ func (f *Filter) marshal() (buf *bytes.Buffer, hash [sha512.Size384]byte, err er
 
 	err = binary.Write(buf, binary.LittleEndian, f.K())
 	if err != nil {
-		return nil, nil, err
+		return nil, hash, err
 	}
 
 	err = binary.Write(buf, binary.LittleEndian, f.n)
 	if err != nil {
-		return nil, nil, err
+		return nil, hash, err
 	}
 
 	err = binary.Write(buf, binary.LittleEndian, f.m)
 	if err != nil {
-		return nil, nil, err
+		return nil, hash, err
 	}
 
 	err = binary.Write(buf, binary.LittleEndian, f.keys)
 	if err != nil {
-		return nil, nil, err
+		return nil, haah, err
 	}
 
 	err = binary.Write(buf, binary.LittleEndian, f.bits)
 	if err != nil {
-		return nil, nil, err
+		return nil, hash, err
 	}
 
 	hash = sha512.Sum384(buf.Bytes())
