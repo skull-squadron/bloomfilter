@@ -16,6 +16,7 @@ import (
 	"os"
 )
 
+// ReadFrom r and replace f with the new bf
 func (f *Filter) ReadFrom(r io.Reader) (n int64, err error) {
 	f2, n, err := ReadFrom(r)
 	if err != nil {
@@ -31,7 +32,12 @@ func ReadFrom(r io.Reader) (f *Filter, n int64, err error) {
 	if err != nil {
 		return
 	}
-	defer _ = rawR.Close()
+	defer func() {
+		err = rawR.Close()
+		if err != nil {
+			return
+		}
+	}()
 
 	content, err := ioutil.ReadAll(rawR)
 	if err != nil {
@@ -54,7 +60,12 @@ func ReadFile(filename string) (_ *Filter, n int64, err error) {
 	if err != nil {
 		return
 	}
-	defer _ = r.Close()
+	defer func() {
+		err = r.Close()
+		if err != nil {
+			return
+		}
+	}()
 
 	return ReadFrom(r)
 }
@@ -65,7 +76,12 @@ func (f *Filter) WriteTo(w io.Writer) (n int64, err error) {
 	defer f.lock.RUnlock()
 
 	rawW := gzip.NewWriter(w)
-	defer _ = rawW.Close()
+	defer func() {
+		err = rawW.Close()
+		if err != nil {
+			return
+		}
+	}()
 
 	content, err := f.MarshalBinary()
 	if err != nil {
@@ -84,7 +100,12 @@ func (f *Filter) WriteFile(filename string) (n int64, err error) {
 	if err != nil {
 		return
 	}
-	defer _ = w.Close()
+	defer func() {
+		err = w.Close()
+		if err != nil {
+			return
+		}
+	}()
 
 	return f.WriteTo(w)
 }
