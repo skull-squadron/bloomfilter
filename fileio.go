@@ -59,9 +59,6 @@ func ReadFile(filename string) (_ *Filter, n int64, err error) {
 	}
 	defer func() {
 		err = r.Close()
-		if err != nil {
-			return nil, -1, err
-		}
 	}()
 
 	return ReadFrom(r)
@@ -75,9 +72,6 @@ func (f *Filter) WriteTo(w io.Writer) (n int64, err error) {
 	rawW := gzip.NewWriter(w)
 	defer func() {
 		err = rawW.Close()
-		if err != nil {
-			return -1, err
-		}
 	}()
 
 	content, err := f.MarshalBinary()
@@ -99,9 +93,6 @@ func (f *Filter) WriteFile(filename string) (n int64, err error) {
 	}
 	defer func() {
 		err = w.Close()
-		if err != nil {
-			return -1, err
-		}
 	}()
 
 	return f.WriteTo(w)
