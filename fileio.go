@@ -31,7 +31,7 @@ func ReadFrom(r io.Reader) (f *Filter, n int64, err error) {
 	if err != nil {
 		return
 	}
-	defer rawR.Close()
+	defer _ = rawR.Close()
 
 	content, err := ioutil.ReadAll(rawR)
 	if err != nil {
@@ -54,7 +54,7 @@ func ReadFile(filename string) (_ *Filter, n int64, err error) {
 	if err != nil {
 		return
 	}
-	defer r.Close()
+	defer _ = r.Close()
 
 	return ReadFrom(r)
 }
@@ -65,7 +65,7 @@ func (f *Filter) WriteTo(w io.Writer) (n int64, err error) {
 	defer f.lock.RUnlock()
 
 	rawW := gzip.NewWriter(w)
-	defer rawW.Close()
+	defer _ = rawW.Close()
 
 	content, err := f.MarshalBinary()
 	if err != nil {
@@ -84,7 +84,7 @@ func (f *Filter) WriteFile(filename string) (n int64, err error) {
 	if err != nil {
 		return
 	}
-	defer w.Close()
+	defer _ = w.Close()
 
 	return f.WriteTo(w)
 }
