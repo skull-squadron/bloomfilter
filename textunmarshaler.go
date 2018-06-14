@@ -29,11 +29,11 @@ func UnmarshalText(text []byte) (f *Filter, err error) {
 	}
 
 	if m < M_MIN {
-		return nil, mError
+		return nil, errM
 	}
 
 	if k < K_MIN {
-		return nil, kError
+		return nil, errK
 	}
 
 	f = &Filter{
