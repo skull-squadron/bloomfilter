@@ -10,5 +10,5 @@ before_script:
   - "go get -u gopkg.in/alecthomas/gometalinter.v2"
   - "gometalinter.v2 --install"
 script:
-  - "go test -v -cover -benchmem -bench $(go list ./... | grep -v /vendor/)"
+  - "go test -v -cover -benchmem -bench=. $(go list ./... | grep -v /vendor/ | sed \"s&_${PWD}&.&\")"
   - "gometalinter.v2 --enable-all ./..."
