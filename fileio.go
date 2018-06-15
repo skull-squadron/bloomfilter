@@ -1,9 +1,10 @@
-//
-// Face-meltingly fast, thread-safe, marshalable, unionable, probability- and optimal-size-calculating Bloom filter in go
+// Package bloomfilter is face-meltingly fast, thread-safe,
+// marshalable, unionable, probability- and
+// optimal-size-calculating Bloom filter in go
 //
 // https://github.com/steakknife/bloomfilter
 //
-// Copyright © 2014, 2015 Barry Allard
+// Copyright © 2014, 2015, 2018 Barry Allard
 //
 // MIT license
 //
@@ -16,17 +17,22 @@ import (
 	"os"
 )
 
-// ReadFrom r and replace f with the new bf
+// ReadFrom r and overwrite f with new Bloom filter data
 func (f *Filter) ReadFrom(r io.Reader) (n int64, err error) {
 	f2, n, err := ReadFrom(r)
 	if err != nil {
 		return -1, err
 	}
-	*f = *f2
+	f.lock.Lock()
+	defer f.lock.Unlock()
+	f.m = f2.m
+	f.n = f2.n
+	f.bits = f2.bits
+	f.keys = f2.keys
 	return n, nil
 }
 
-// Read a lossless-compressed Bloom filter from Reader
+// ReadFrom Reader r into a lossless-compressed Bloom filter f
 func ReadFrom(r io.Reader) (f *Filter, n int64, err error) {
 	rawR, err := gzip.NewReader(r)
 	if err != nil {
@@ -50,9 +56,9 @@ func ReadFrom(r io.Reader) (f *Filter, n int64, err error) {
 	return f, n, nil
 }
 
-// Read a lossless-compressed Bloom filter to a file
+// ReadFile from filename into a lossless-compressed Bloom Filter f
 // Suggested file extension: .bf.gz
-func ReadFile(filename string) (_ *Filter, n int64, err error) {
+func ReadFile(filename string) (f *Filter, n int64, err error) {
 	r, err := os.Open(filename)
 	if err != nil {
 		return nil, -1, err
@@ -64,7 +70,7 @@ func ReadFile(filename string) (_ *Filter, n int64, err error) {
 	return ReadFrom(r)
 }
 
-// Write a lossless-compressed Bloom filter to Writer
+// WriteTo a Writer w from lossless-compressed Bloom Filter f
 func (f *Filter) WriteTo(w io.Writer) (n int64, err error) {
 	f.lock.RLock()
 	defer f.lock.RUnlock()
@@ -84,7 +90,7 @@ func (f *Filter) WriteTo(w io.Writer) (n int64, err error) {
 	return n, err
 }
 
-// Write a lossless-compressed Bloom filter to a file
+// WriteFile filename from a a lossless-compressed Bloom Filter f
 // Suggested file extension: .bf.gz
 func (f *Filter) WriteFile(filename string) (n int64, err error) {
 	w, err := os.Create(filename)

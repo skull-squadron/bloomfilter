@@ -1,5 +1,6 @@
-//
-// Face-meltingly fast, thread-safe, marshalable, unionable, probability- and optimal-size-calculating Bloom filter in go
+// Package bloomfilter is face-meltingly fast, thread-safe,
+// marshalable, unionable, probability- and
+// optimal-size-calculating Bloom filter in go
 //
 // https://github.com/steakknife/bloomfilter
 //
@@ -14,7 +15,7 @@ import (
 	"sync"
 )
 
-// opaque Bloom filter
+// Filter is an opaque Bloom filter type
 type Filter struct {
 	lock sync.RWMutex
 	bits []uint64
@@ -34,17 +35,17 @@ func (f *Filter) hash(v hash.Hash64) []uint64 {
 	return hashes
 }
 
-// return size of Bloom filter, in bits
+// M is the size of Bloom filter, in bits
 func (f *Filter) M() uint64 {
 	return f.m
 }
 
-// return count of keys
+// K is the count of keys
 func (f *Filter) K() uint64 {
 	return uint64(len(f.keys))
 }
 
-// add a hashable item, v, to the filter
+// Add a hashable item, v, to the filter
 func (f *Filter) Add(v hash.Hash64) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
@@ -57,6 +58,7 @@ func (f *Filter) Add(v hash.Hash64) {
 	f.n++
 }
 
+// Contains tests if f contains v
 // false: f definitely does not contain value v
 // true:  f maybe contains value v
 func (f *Filter) Contains(v hash.Hash64) bool {
@@ -72,18 +74,21 @@ func (f *Filter) Contains(v hash.Hash64) bool {
 	return uint64ToBool(r)
 }
 
-// create a copy of Bloom filter f
-func (f *Filter) Copy() *Filter {
+// Copy f to a new Bloom filter
+func (f *Filter) Copy() (*Filter, error) {
 	f.lock.RLock()
 	defer f.lock.RUnlock()
 
-	out := f.NewCompatible()
+	out, err := f.NewCompatible()
+	if err != nil {
+		return nil, err
+	}
 	copy(out.bits, f.bits)
 	out.n = f.n
-	return out
+	return out, nil
 }
 
-// merge Bloom filter f2 into f
+// UnionInPlace merges Bloom filter f2 into f
 func (f *Filter) UnionInPlace(f2 *Filter) error {
 	if !f.IsCompatible(f2) {
 		return errIncompatibleBloomFilters
@@ -98,7 +103,7 @@ func (f *Filter) UnionInPlace(f2 *Filter) error {
 	return nil
 }
 
-// out is a copy of f unioned with f2
+// Union merges f2 and f2 into a new Filter out
 func (f *Filter) Union(f2 *Filter) (out *Filter, err error) {
 	if !f.IsCompatible(f2) {
 		return nil, errIncompatibleBloomFilters
@@ -107,7 +112,10 @@ func (f *Filter) Union(f2 *Filter) (out *Filter, err error) {
 	f.lock.RLock()
 	defer f.lock.RUnlock()
 
-	out = f.NewCompatible()
+	out, err = f.NewCompatible()
+	if err != nil {
+		return nil, err
+	}
 	for i, bitword := range f2.bits {
 		out.bits[i] = f.bits[i] | bitword
 	}

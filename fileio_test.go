@@ -1,3 +1,13 @@
+// Package bloomfilter is face-meltingly fast, thread-safe,
+// marshalable, unionable, probability- and
+// optimal-size-calculating Bloom filter in go
+//
+// https://github.com/steakknife/bloomfilter
+//
+// Copyright © 2014, 2015, 2018 Barry Allard
+//
+// MIT license
+//
 package bloomfilter
 
 import (
@@ -7,7 +17,7 @@ import (
 
 func TestWriteRead(t *testing.T) {
 	// minimal filter
-	f := New(2, 1)
+	f, _ := New(2, 1)
 
 	v := hashableUint64(0)
 	f.Add(v)

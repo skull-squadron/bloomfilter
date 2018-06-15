@@ -1,9 +1,10 @@
-//
-// Face-meltingly fast, thread-safe, marshalable, unionable, probability- and optimal-size-calculating Bloom filter in go
+// Package bloomfilter is face-meltingly fast, thread-safe,
+// marshalable, unionable, probability- and
+// optimal-size-calculating Bloom filter in go
 //
 // https://github.com/steakknife/bloomfilter
 //
-// Copyright © 2014, 2015 Barry Allard
+// Copyright © 2014, 2015, 2018 Barry Allard
 //
 // MIT license
 //
@@ -16,8 +17,8 @@ import (
 	"encoding/binary"
 )
 
+// UnmarshalBinary converts []bytes into a Filter
 // conforms to encoding.BinaryUnmarshaler
-
 func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 	f.lock.Lock()
 	defer f.lock.Unlock()
@@ -30,7 +31,7 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 		return err
 	}
 
-	if k < K_MIN {
+	if k < KMin {
 		return errK
 	}
 
@@ -44,7 +45,7 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 		return err
 	}
 
-	if f.m < M_MIN {
+	if f.m < MMin {
 		return errM
 	}
 
@@ -71,10 +72,12 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 	actualHash := sha512.Sum384(data[:len(data)-sha512.Size384])
 
 	if !hmac.Equal(expectedHash, actualHash[:]) {
-		debug("bloomfilter.UnmarshalBinary() sha384 hash failed: actual %v  expected %v", actualHash, expectedHash)
+		debug("bloomfilter.UnmarshalBinary() sha384 hash failed:",
+			" actual %v  expected %v", actualHash, expectedHash)
 		return errHash
 	}
 
-	debug("bloomfilter.UnmarshalBinary() successfully read %d byte(s), sha384 %v", len(data), actualHash)
+	debug("bloomfilter.UnmarshalBinary() successfully read",
+		" %d byte(s), sha384 %v", len(data), actualHash)
 	return nil
 }

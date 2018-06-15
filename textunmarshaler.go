@@ -1,3 +1,13 @@
+// Package bloomfilter is face-meltingly fast, thread-safe,
+// marshalable, unionable, probability- and
+// optimal-size-calculating Bloom filter in go
+//
+// https://github.com/steakknife/bloomfilter
+//
+// Copyright © 2014, 2015, 2018 Barry Allard
+//
+// MIT license
+//
 package bloomfilter
 
 import (
@@ -5,6 +15,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha512"
 	"fmt"
+	"io"
 )
 
 const (
@@ -14,57 +25,46 @@ const (
 
 var nl = fmt.Sprintln()
 
-func UnmarshalText(text []byte) (f *Filter, err error) {
-	var k, n, m uint64
-	r := bytes.NewBuffer(text)
-
+func unmarshalTextHeader(r io.Reader) (k, n, m uint64, err error) {
 	format := "k" + nl + "%d" + nl
 	format += "n" + nl + "%d" + nl
 	format += "m" + nl + "%d" + nl
 	format += "keys" + nl
 
 	_, err = fmt.Fscanf(r, format, k, n, m)
-	if err != nil {
-		return nil, err
-	}
+	return k, n, m, err
+}
 
-	if m < M_MIN {
-		return nil, errM
-	}
-
-	if k < K_MIN {
-		return nil, errK
-	}
-
-	f = &Filter{
-		m:    m,
-		n:    n,
-		keys: make([]uint64, k),
-		bits: make([]uint64, (m+63)/64),
-	}
-
-	for i := range f.keys {
-		_, err = fmt.Fscanf(r, keyFormat, f.keys[i])
+func unmarshalTextKeys(r io.Reader, keys []uint64) (err error) {
+	for i := range keys {
+		_, err = fmt.Fscanf(r, keyFormat, keys[i])
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
+	return nil
+}
 
+func unmarshalTextBits(r io.Reader, bits []uint64) (err error) {
 	_, err = fmt.Fscanf(r, "bits")
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	for i := range f.bits {
-		_, err = fmt.Fscanf(r, bitsFormat, f.bits[i])
+	for i := range bits {
+		_, err = fmt.Fscanf(r, bitsFormat, bits[i])
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
+	return nil
+}
+
+func unmarshalAndCheckTextHash(r io.Reader, f *Filter) (err error) {
 	_, err = fmt.Fscanf(r, "sha384")
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	actualHash := [sha512.Size384]byte{}
@@ -72,23 +72,65 @@ func UnmarshalText(text []byte) (f *Filter, err error) {
 	for i := range actualHash {
 		_, err = fmt.Fscanf(r, "%02x", actualHash[i])
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
 
 	_, expectedHash, err := f.marshal()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if !hmac.Equal(expectedHash[:], actualHash[:]) {
-		return nil, errHash
+		return errHash
+	}
+
+	return nil
+}
+
+// UnmarshalText conforms to TextUnmarshaler
+func UnmarshalText(text []byte) (f *Filter, err error) {
+	r := bytes.NewBuffer(text)
+	k, n, m, err := unmarshalTextHeader(r)
+	if err != nil {
+		return nil, err
+	}
+
+	keys, err := newKeysBlank(k)
+	if err != nil {
+		return nil, err
+	}
+
+	err = unmarshalTextKeys(r, keys)
+	if err != nil {
+		return nil, err
+	}
+
+	bits, err := newBits(m)
+	if err != nil {
+		return nil, err
+	}
+
+	err = unmarshalTextBits(r, bits)
+	if err != nil {
+		return nil, err
+	}
+
+	f, err = newWithKeysAndBits(m, keys, bits, n)
+	if err != nil {
+		return nil, err
+	}
+
+	err = unmarshalAndCheckTextHash(r, f)
+	if err != nil {
+		return nil, err
 	}
 
 	return f, nil
 }
 
-func (f *Filter) UnmarshalText(text []byte) (err error) {
+// UnmarshalText method overwrites f with data decoded from text
+func (f *Filter) UnmarshalText(text []byte) error {
 	f.lock.Lock()
 	defer f.lock.Unlock()
 

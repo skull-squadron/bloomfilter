@@ -1,3 +1,13 @@
+// Package bloomfilter is face-meltingly fast, thread-safe,
+// marshalable, unionable, probability- and
+// optimal-size-calculating Bloom filter in go
+//
+// https://github.com/steakknife/bloomfilter
+//
+// Copyright © 2014, 2015, 2018 Barry Allard
+//
+// MIT license
+//
 package bloomfilter
 
 import (
@@ -7,12 +17,13 @@ import (
 )
 
 // compile-time conformance tests
-
-func (f *Filter) conformsToBinaryMarshaler() encoding.BinaryMarshaler     { return f }
-func (f *Filter) conformsToBinaryUnmarshaler() encoding.BinaryUnmarshaler { return f }
-func (f *Filter) conformsToTextMarshaler() encoding.TextMarshaler         { return f }
-func (f *Filter) conformsToTextUnmarshaler() encoding.TextUnmarshaler     { return f }
-func (f *Filter) conformsToReaderFrom() io.ReaderFrom                     { return f }
-func (f *Filter) conformsToWriterTo() io.WriterTo                         { return f }
-func (f *Filter) conformsToGobDecoder() gob.GobDecoder                    { return f }
-func (f *Filter) conformsToGobEncoder() gob.GobEncoder                    { return f }
+var (
+	_ encoding.BinaryMarshaler   = (*Filter)(nil)
+	_ encoding.BinaryUnmarshaler = (*Filter)(nil)
+	_ encoding.TextMarshaler     = (*Filter)(nil)
+	_ encoding.TextUnmarshaler   = (*Filter)(nil)
+	_ io.ReaderFrom              = (*Filter)(nil)
+	_ io.WriterTo                = (*Filter)(nil)
+	_ gob.GobDecoder             = (*Filter)(nil)
+	_ gob.GobEncoder             = (*Filter)(nil)
+)
