@@ -65,11 +65,11 @@ func (f *Filter) Contains(v hash.Hash64) bool {
 	f.lock.RLock()
 	defer f.lock.RUnlock()
 
-	r := uint64(0)
+	r := uint64(1)
 	for _, i := range f.hash(v) {
 		// r |= f.getBit(k)
 		i %= f.m
-		r |= (f.bits[i>>6] >> uint(i&0x3f)) & 1
+		r &= (f.bits[i>>6] >> uint(i&0x3f)) & 1
 	}
 	return uint64ToBool(r)
 }
