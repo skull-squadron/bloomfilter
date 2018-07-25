@@ -46,7 +46,7 @@ func (f *Filter) marshal() (buf *bytes.Buffer,
 		return nil, hash, err
 	}
 
-	err = binary.Write(buf, binary.LittleEndian, f.n)
+	err = binary.Write(buf, binary.LittleEndian, uint64(len(f.bits)))
 	if err != nil {
 		return nil, hash, err
 	}
