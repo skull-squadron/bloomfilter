@@ -15,59 +15,57 @@ import (
 	"crypto/hmac"
 	"crypto/sha512"
 	"encoding/binary"
+	"io"
 )
 
-// UnmarshalBinary converts []bytes into a Filter
-// conforms to encoding.BinaryUnmarshaler
-func (f *Filter) UnmarshalBinary(data []byte) (err error) {
-	f.lock.Lock()
-	defer f.lock.Unlock()
-
-	var k uint64
-
-	buf := bytes.NewBuffer(data)
-	err = binary.Read(buf, binary.LittleEndian, &k)
+func unmarshalBinaryHeader(r io.Reader) (k, n, m uint64, err error) {
+	err = binary.Read(r, binary.LittleEndian, &k)
 	if err != nil {
-		return err
+		return k, n, m, err
 	}
 
 	if k < KMin {
-		return errK
+		return k, n, m, errK()
 	}
 
-	err = binary.Read(buf, binary.LittleEndian, &(f.n))
+	err = binary.Read(r, binary.LittleEndian, &n)
 	if err != nil {
-		return err
+		return k, n, m, err
 	}
 
-	err = binary.Read(buf, binary.LittleEndian, &(f.m))
+	err = binary.Read(r, binary.LittleEndian, &m)
 	if err != nil {
-		return err
+		return k, n, m, err
 	}
 
-	if f.m < MMin {
-		return errM
+	if m < MMin {
+		return k, n, m, errM()
 	}
 
-	debug("read bf k=%d n=%d m=%d\n", k, f.n, f.m)
+	debug("read bf k=%d n=%d m=%d\n", k, n, m)
 
-	f.keys = make([]uint64, k)
-	err = binary.Read(buf, binary.LittleEndian, f.keys)
+	return k, n, m, err
+}
+
+func unmarshalBinaryBits(r io.Reader, m uint64) (bits []uint64, err error) {
+	bits, err = newBits(m)
 	if err != nil {
-		return err
+		return bits, err
 	}
+	err = binary.Read(r, binary.LittleEndian, bits)
+	return bits, err
 
-	f.bits, err = newBits(f.m)
-	if err != nil {
-		return err
-	}
-	err = binary.Read(buf, binary.LittleEndian, f.bits)
-	if err != nil {
-		return err
-	}
+}
 
+func unmarshalBinaryKeys(r io.Reader, k uint64) (keys []uint64, err error) {
+	keys = make([]uint64, k)
+	err = binary.Read(r, binary.LittleEndian, keys)
+	return keys, err
+}
+
+func checkBinaryHash(r io.Reader, data []byte) (err error) {
 	expectedHash := make([]byte, sha512.Size384)
-	err = binary.Read(buf, binary.LittleEndian, expectedHash)
+	err = binary.Read(r, binary.LittleEndian, expectedHash)
 	if err != nil {
 		return err
 	}
@@ -77,10 +75,37 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 	if !hmac.Equal(expectedHash, actualHash[:]) {
 		debug("bloomfilter.UnmarshalBinary() sha384 hash failed:"+
 			" actual %v  expected %v", actualHash, expectedHash)
-		return errHash
+		return errHash()
 	}
 
 	debug("bloomfilter.UnmarshalBinary() successfully read"+
 		" %d byte(s), sha384 %v", len(data), actualHash)
 	return nil
+}
+
+// UnmarshalBinary converts []bytes into a Filter
+// conforms to encoding.BinaryUnmarshaler
+func (f *Filter) UnmarshalBinary(data []byte) (err error) {
+	f.lock.Lock()
+	defer f.lock.Unlock()
+
+	buf := bytes.NewBuffer(data)
+
+	var k uint64
+	k, f.n, f.m, err = unmarshalBinaryHeader(buf)
+	if err != nil {
+		return err
+	}
+
+	f.keys, err = unmarshalBinaryKeys(buf, k)
+	if err != nil {
+		return err
+	}
+
+	f.bits, err = unmarshalBinaryBits(buf, f.m)
+	if err != nil {
+		return err
+	}
+
+	return checkBinaryHash(buf, data)
 }

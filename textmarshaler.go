@@ -26,12 +26,12 @@ func (f *Filter) MarshalText() (text []byte, err error) {
 
 	s += fmt.Sprintln("keys")
 	for key := range f.keys {
-		s += fmt.Sprintf(keyFormat, key) + nl
+		s += fmt.Sprintf(keyFormat, key) + nl()
 	}
 
 	s += fmt.Sprintln("bits")
 	for w := range f.bits {
-		s += fmt.Sprintf(bitsFormat, w) + nl
+		s += fmt.Sprintf(bitsFormat, w) + nl()
 	}
 
 	_, hash, err := f.marshal()
@@ -42,7 +42,7 @@ func (f *Filter) MarshalText() (text []byte, err error) {
 	for b := range hash {
 		s += fmt.Sprintf("%02x", b)
 	}
-	s += nl
+	s += nl()
 
 	text = []byte(s)
 	return text, nil

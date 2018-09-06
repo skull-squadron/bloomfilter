@@ -10,14 +10,28 @@
 //
 package bloomfilter
 
-import "log"
+import (
+	"log"
+	"os"
+)
 
-// Debug controls whether debug() logs anything
-var Debug = false
+const debugVar = "GOLANG_STEAKKNIFE_BLOOMFILTER_DEBUG"
 
-// debug printing when Debug is true
+// EnableDebugging permits debug() logging of details to stderr
+func EnableDebugging() {
+	err := os.Setenv(debugVar, "1")
+	if err != nil {
+		panic("Unable to Setenv " + debugVar)
+	}
+}
+
+func debugging() bool {
+	return os.Getenv(debugVar) != ""
+}
+
+// debug printing when debugging() is true
 func debug(format string, a ...interface{}) {
-	if Debug {
+	if debugging() {
 		log.Printf(format, a...)
 	}
 }

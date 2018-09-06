@@ -97,21 +97,21 @@ func NewWithKeys(m uint64, origKeys []uint64) (f *Filter, err error) {
 
 func newBits(m uint64) ([]uint64, error) {
 	if m < MMin {
-		return nil, errM
+		return nil, errM()
 	}
 	return make([]uint64, (m+63)/64), nil
 }
 
 func newKeysBlank(k uint64) ([]uint64, error) {
 	if k < KMin {
-		return nil, errK
+		return nil, errK()
 	}
 	return make([]uint64, k), nil
 }
 
 func newKeysCopy(origKeys []uint64) (keys []uint64, err error) {
 	if !UniqueKeys(origKeys) {
-		return nil, errUniqueKeys
+		return nil, errUniqueKeys()
 	}
 	keys, err = newKeysBlank(uint64(len(origKeys)))
 	if err != nil {

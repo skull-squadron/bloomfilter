@@ -23,13 +23,15 @@ const (
 	bitsFormat = "%016x"
 )
 
-var nl = fmt.Sprintln()
+func nl() string {
+	return fmt.Sprintln()
+}
 
 func unmarshalTextHeader(r io.Reader) (k, n, m uint64, err error) {
-	format := "k" + nl + "%d" + nl
-	format += "n" + nl + "%d" + nl
-	format += "m" + nl + "%d" + nl
-	format += "keys" + nl
+	format := "k" + nl() + "%d" + nl()
+	format += "n" + nl() + "%d" + nl()
+	format += "m" + nl() + "%d" + nl()
+	format += "keys" + nl()
 
 	_, err = fmt.Fscanf(r, format, k, n, m)
 	return k, n, m, err
@@ -82,7 +84,7 @@ func unmarshalAndCheckTextHash(r io.Reader, f *Filter) (err error) {
 	}
 
 	if !hmac.Equal(expectedHash[:], actualHash[:]) {
-		return errHash
+		return errHash()
 	}
 
 	return nil

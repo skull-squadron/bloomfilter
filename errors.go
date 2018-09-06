@@ -12,13 +12,23 @@ package bloomfilter
 
 import "fmt"
 
-var errHash = fmt.Errorf(
-	"Hash mismatch, the Bloom filter is probably corrupt")
-var errK = fmt.Errorf(
-	"keys must have length %d or greater", KMin)
-var errM = fmt.Errorf(
-	"m (number of bits in the Bloom filter) must be >= %d", MMin)
-var errUniqueKeys = fmt.Errorf(
-	"Bloom filter keys must be unique")
-var errIncompatibleBloomFilters = fmt.Errorf(
-	"Cannot perform union on two incompatible Bloom filters")
+func errHash() error {
+	return fmt.Errorf(
+		"Hash mismatch, the Bloom filter is probably corrupt")
+}
+func errK() error {
+	return fmt.Errorf(
+		"keys must have length %d or greater", KMin)
+}
+func errM() error {
+	return fmt.Errorf(
+		"m (number of bits in the Bloom filter) must be >= %d", MMin)
+}
+func errUniqueKeys() error {
+	return fmt.Errorf(
+		"Bloom filter keys must be unique")
+}
+func errIncompatibleBloomFilters() error {
+	return fmt.Errorf(
+		"Cannot perform union on two incompatible Bloom filters")
+}

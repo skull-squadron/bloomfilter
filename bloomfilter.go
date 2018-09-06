@@ -65,11 +65,11 @@ func (f *Filter) Contains(v hash.Hash64) bool {
 	f.lock.RLock()
 	defer f.lock.RUnlock()
 
-	r := uint64(0)
+	r := uint64(1)
 	for _, i := range f.hash(v) {
 		// r |= f.getBit(k)
 		i %= f.m
-		r |= (f.bits[i>>6] >> uint(i&0x3f)) & 1
+		r &= (f.bits[i>>6] >> uint(i&0x3f)) & 1
 	}
 	return uint64ToBool(r)
 }
@@ -91,7 +91,7 @@ func (f *Filter) Copy() (*Filter, error) {
 // UnionInPlace merges Bloom filter f2 into f
 func (f *Filter) UnionInPlace(f2 *Filter) error {
 	if !f.IsCompatible(f2) {
-		return errIncompatibleBloomFilters
+		return errIncompatibleBloomFilters()
 	}
 
 	f.lock.Lock()
@@ -106,7 +106,7 @@ func (f *Filter) UnionInPlace(f2 *Filter) error {
 // Union merges f2 and f2 into a new Filter out
 func (f *Filter) Union(f2 *Filter) (out *Filter, err error) {
 	if !f.IsCompatible(f2) {
-		return nil, errIncompatibleBloomFilters
+		return nil, errIncompatibleBloomFilters()
 	}
 
 	f.lock.RLock()

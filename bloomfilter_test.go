@@ -43,33 +43,37 @@ func (h hashableUint64) Sum64() uint64 {
 	return uint64(h)
 }
 
-var hashableUint64Values = []hashableUint64{
-	0,
-	7,
-	0x0c0ffee0,
-	0xdeadbeef,
-	0xffffffff,
+func hashableUint64Values() []hashableUint64 {
+	return []hashableUint64{
+		0,
+		7,
+		0x0c0ffee0,
+		0xdeadbeef,
+		0xffffffff,
+	}
 }
 
-var hashableUint64NotValues = []hashableUint64{
-	1,
-	5,
-	42,
-	0xa5a5a5a5,
-	0xfffffffe,
+func hashableUint64NotValues() []hashableUint64 {
+	return []hashableUint64{
+		1,
+		5,
+		42,
+		0xa5a5a5a5,
+		0xfffffffe,
+	}
 }
 
 func Test0(t *testing.T) {
 	bf, _ := New(10000, 5)
 
 	t.Log("Filled ratio before adds :", bf.PreciseFilledRatio())
-	for _, x := range hashableUint64Values {
+	for _, x := range hashableUint64Values() {
 		bf.Add(x)
 	}
 	t.Log("Filled ratio after adds :", bf.PreciseFilledRatio())
 
 	// these may or may not be true
-	for _, y := range hashableUint64Values {
+	for _, y := range hashableUint64Values() {
 		if bf.Contains(y) {
 			t.Log("value in set querties: may contain ", y)
 		} else {
@@ -79,7 +83,7 @@ func Test0(t *testing.T) {
 	}
 
 	// these must all be false
-	for _, z := range hashableUint64NotValues {
+	for _, z := range hashableUint64NotValues() {
 		if bf.Contains(z) {
 			t.Log("value not in set queries: may or may not contain ", z)
 		} else {
