@@ -5,7 +5,7 @@
 
 # Face-meltingly fast, thread-safe, marshalable, unionable, probability- and optimal-size-calculating Bloom filter in go
 
-Copyright © 2014-2016 Barry Allard
+Copyright © 2014-2016,2018 Barry Allard
 
 [MIT license](MIT-LICENSE.txt)
 
