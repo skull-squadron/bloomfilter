@@ -72,12 +72,12 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 	actualHash := sha512.Sum384(data[:len(data)-sha512.Size384])
 
 	if !hmac.Equal(expectedHash, actualHash[:]) {
-		debug("bloomfilter.UnmarshalBinary() sha384 hash failed:",
+		debug("bloomfilter.UnmarshalBinary() sha384 hash failed:"+
 			" actual %v  expected %v", actualHash, expectedHash)
 		return errHash
 	}
 
-	debug("bloomfilter.UnmarshalBinary() successfully read",
+	debug("bloomfilter.UnmarshalBinary() successfully read"+
 		" %d byte(s), sha384 %v", len(data), actualHash)
 	return nil
 }

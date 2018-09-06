@@ -55,10 +55,10 @@ func (f *Filter) NewCompatible() (*Filter, error) {
 func NewOptimal(maxN uint64, p float64) (*Filter, error) {
 	m := OptimalM(maxN, p)
 	k := OptimalK(m, maxN)
-	debug("New optimal bloom filter ::",
-		" requested max elements (n):%d,",
-		" probability of collision (p):%1.10f ",
-		"-> recommends -> bits (m): %d (%f GiB), ",
+	debug("New optimal bloom filter ::"+
+		" requested max elements (n):%d,"+
+		" probability of collision (p):%1.10f "+
+		"-> recommends -> bits (m): %d (%f GiB), "+
 		"number of keys (k): %d",
 		maxN, p, m, float64(m)/(gigabitsPerGiB), k)
 	return New(m, k)
