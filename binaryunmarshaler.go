@@ -57,7 +57,10 @@ func (f *Filter) UnmarshalBinary(data []byte) (err error) {
 		return err
 	}
 
-	f.bits = make([]uint64, f.n)
+	f.bits, err = newBits(f.m)
+	if err != nil {
+		return err
+	}
 	err = binary.Read(buf, binary.LittleEndian, f.bits)
 	if err != nil {
 		return err
