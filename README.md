@@ -66,7 +66,10 @@ const (
   probCollide = 0.0000001
 )
 
-bf := bloomfilter.NewOptimal(maxElements, probCollide)
+bf, err := bloomfilter.NewOptimal(maxElements, probCollide)
+if err != nil {
+  panic(err)
+}
 
 someValue := ... // must conform to hash.Hash64
 
